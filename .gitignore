@@ -1,0 +1,26 @@
+# build scratch
+/dropdiff
+/bin/
+/dist/
+*.exe
+*.test
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# local wired config + synced registry (never ship a user's secrets)
+.dropdiff/
+
+# build control files
+PUBLISH_BLOCKED.md
+BUILD_SETUP_NEXT_STEPS.md
+.spawn.*
+.builder_*
+.build_metadata*
+.stage_*
+
+# assistant scaffolding (kept out of history)
+.claude/
+CLAUDE.md
