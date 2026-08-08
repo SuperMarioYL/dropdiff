@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "content_version": 1,
+  "name": "dropdiff",
+  "github": "https://github.com/SuperMarioYL/dropdiff",
+  "host": "dropdiff.lei6393.com",
+  "lang": { "primary": "zh", "toggle": true },
+  "accent": ["#3f9c8f"],
+  "hero": {
+    "eyebrow": { "zh": "国产模型 drop · 配置感知 · 一条命令", "en": "Chinese-model drops · Config-aware · One command" },
+    "headline": { "zh": "这周又 drop 了一堆国产模型\n只标出影响你配置的那几条", "en": "Another week, another pile of model drops\nOnly the ones that touch your setup" },
+    "sub": { "zh": "它先读你接进编码助手的那份模型配置，再拿这周的 drop 一条条对照——只把真正动了你字段的变更标成红绿：价格、上下文长度、缓存价、可用的量化档、工具调用行为。卡片是模型作者写的，不知道你接的是哪个；它知道。", "en": "It reads the model config you wired into your coding agent, then checks each week's drop against it — flagging only the changes that touch your fields in red and green: price, context length, cache price, available quants, tool-call behavior. A card is written by the model's author, who doesn't know which one you're on. This does." },
+    "command": "dropdiff check",
+    "cta": { "zh": "一条命令开跑", "en": "Run it in one command" },
+    "ctaGithub": { "zh": "在 GitHub 上查看", "en": "View on GitHub" },
+    "scroll": { "zh": "看它怎么标", "en": "See how it flags" }
+  },
+  "advantages": [
+    {
+      "title": { "zh": "只标动到你配置的那几条", "en": "Only the deltas that touch your setup" },
+      "body": { "zh": "每个 drop 都带着一堆变更——价格、上下文、缓存、量化、工具调用。DropDiff 只把你真正接进 Agent 的字段挑出来标红绿，其余的当背景音略过。卡片是模型作者写的，不知道你接的是哪个；它知道。", "en": "Every drop ships a pile of changes — price, context, cache, quants, tool-calling. DropDiff picks out only the fields you actually wired into your agent, flags them red or green, and lets the rest fade into background. A card is written by the model's author, who doesn't know which one you're on. This does." },
+      "chips": ["› 只看你的字段", "› 其余当背景音"]
+    },
+    {
+      "title": { "zh": "你接的配置，它自己读出来", "en": "It reads the config you already wired" },
+      "body": { "zh": "不用手填一张表——它直接探测你编码助手里的模型、地址、上下文和缓存设置，记成一份你接的配置。下次 drop 来了，对照的就是你真在用的那一份，不是一份过时的清单。", "en": "No form to fill — it detects the model, endpoint, context, and cache settings already living in your coding agent and records them as your wired config. When the next drop lands, it's checked against what you're actually running, not a stale checklist." },
+      "chips": ["› 探测你的编码助手配置", "› 自动记下你接的配置"]
+    },
+    {
+      "title": { "zh": "没网也能跑这一条", "en": "Runs even with no network" },
+      "body": { "zh": "装上就能 check——一份随程序一起带的 drop 清单，第一次跑不用联网拉取。想刷新到最新一周，一条 sync 拉回来；拉不到，照样对照自带的那一份。", "en": "Install and check right away — a drop list ships with the program, so the first run needs no network fetch. Want the freshest week? One sync pulls it in; if it can't, you still diff against the copy that came with it." },
+      "chips": ["› 自带 drop 清单", "› 离线首跑可用"]
+    },
+    {
+      "title": { "zh": "卡片更新前，它先抓到", "en": "Caught before the card updates" },
+      "body": { "zh": "国产模型的 drop 往往先出现在厂商的代码提交里，等卡片更新已经晚了好几天。DropDiff 的每条 drop 都标着来源——卡片链接和那条提交，哪个先到就用哪个，不等你手动扒五个 tab。", "en": "Chinese-model drops often show up first in a vendor's code commit; by the time the card updates, days have passed. Every drop in DropDiff carries its source — the card link and that commit — whichever lands first is used, so you stop digging through five tabs by hand." },
+      "chips": ["› 每条带来源", "› 提交先于卡片"]
+    }
+  ],
+  "scene": { "kind": "hub-nodes", "nodes": ["DeepSeek", "Qwen", "Kimi", "GLM"] },
+  "cta": {
+    "headline": { "zh": "每周的 drop，不再靠手动扒", "en": "Weekly drops, no more digging by hand" },
+    "sub": { "zh": "一条命令装上，让国产模型 carousel 的变更只对你接的配置说话。", "en": "Install in one command — the carousel's changes speak only to the config you wired." },
+    "button": { "zh": "在 GitHub 上查看", "en": "View on GitHub" }
+  },
+  "footer": { "tag": { "zh": "MIT · 本地跑 · 一条命令", "en": "MIT · Runs locally · One command" } }
+}
