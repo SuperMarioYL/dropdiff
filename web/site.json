@@ -104,6 +104,10 @@
           "alt": {
             "zh": "实际调用核心 differ，分别以 implicit 和 off 的缓存模式读取相同快照。输出只证明字段相关性规则的执行，没有查询最新模型定价、SDK commit 或平台配置。",
             "en": "The real differ compares the same snapshot with implicit and off cache modes. The output exercises field-relevance rules; it does not query current pricing, SDK commits or platform settings."
+          },
+          "mobile": {
+            "light": "/assets/presentation/process-mobile-light.svg",
+            "dark": "/assets/presentation/process-mobile-dark.svg"
           }
         }
       },
@@ -122,6 +126,10 @@
           "alt": {
             "zh": "config 解析或读取模型配置，spec 加载 YAML DropSpec，differ 先寻找明确 successor，没有时可按同 vendor 的较新记录回退。render 输出相关或 informational 标签；check/list 可离线，sync 才拉取远程 registry。",
             "en": "config parses or reads model settings; spec loads YAML DropSpecs. The differ prefers explicit successors and can fall back to newer records from the same vendor. render labels relevant and informational changes. check/list can run offline; sync fetches a registry."
+          },
+          "mobile": {
+            "light": "/assets/presentation/architecture-mobile-light.svg",
+            "dark": "/assets/presentation/architecture-mobile-dark.svg"
           }
         }
       },
@@ -140,6 +148,10 @@
           "alt": {
             "zh": "比较依赖注册表维护质量。明确 successor 优于同 vendor 的日期回退；价格只在单位相同时比较。报告用于筛选待核对变化，不替代供应商来源核验。",
             "en": "Comparison depends on registry quality. Explicit successors are preferred over same-vendor date fallback, and prices compare only when units match. Reports help select changes to verify rather than replacing source verification."
+          },
+          "mobile": {
+            "light": "/assets/presentation/integrations-mobile-light.svg",
+            "dark": "/assets/presentation/integrations-mobile-dark.svg"
           }
         }
       }
