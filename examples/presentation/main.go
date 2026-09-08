@@ -1,0 +1,3 @@
+package main
+import("fmt";"os";"github.com/SuperMarioYL/dropdiff/internal/config";"github.com/SuperMarioYL/dropdiff/internal/diff";"github.com/SuperMarioYL/dropdiff/internal/spec";"github.com/SuperMarioYL/dropdiff/internal/render")
+func main(){mode:="implicit";if len(os.Args)>1{mode=os.Args[1]};registry,err:=spec.LoadFile("data/registry.yaml");if err!=nil{panic(err)};wired:=&config.WiredConfig{Model:"glm-4.6",BaseURL:"https://example.invalid/v1",Context:"128000",CacheMode:mode,Source:"demo fixture"};deltas:=diff.New().Diff(wired,registry);fmt.Printf("Local registry snapshot: %s; fixture cache_mode=%s\n",registry.Updated,mode);fmt.Print(render.Render(deltas));fmt.Println(render.Summary(deltas))}

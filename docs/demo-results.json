@@ -1,0 +1,26 @@
+{
+  "version": "0.1.0",
+  "scope": "Offline core diff against an explicit repository registry snapshot. Snapshot pricing and source references were not verified as current vendor facts; no user configuration is read or synchronized.",
+  "inputs": [
+    {
+      "path": "examples/presentation/main.go",
+      "sha256": "c8b569e791740c6400dd545ffb2218743f582c9d113562a6ea97b56a80090fc5"
+    },
+    {
+      "path": "data/registry.yaml",
+      "sha256": "d9df5046371ea8ab692d20403a5d03664e612b800625cc785a2cd2db5feff019"
+    }
+  ],
+  "steps": [
+    {
+      "command": "go run ./examples/presentation implicit",
+      "output": "Local registry snapshot: 2026-08-09; fixture cache_mode=implicit\n\nglm-5.3  2026-07-29  [GLM]\n  ✓ pricing.cache: 0.28 CNY/M -> 0.14 CNY/M\n      affects your wired config — implicit cache price\n  ✓ quants: fp16,int8 -> fp16,int8,fp8\n      informational — quants removed=[] added=[fp8]\n2 delta(s): 0 red, 2 green, 0 amber\n",
+      "exit_code": 0
+    },
+    {
+      "command": "go run ./examples/presentation off",
+      "output": "Local registry snapshot: 2026-08-09; fixture cache_mode=off\n\nglm-5.3  2026-07-29  [GLM]\n  ✓ pricing.cache: 0.28 CNY/M -> 0.14 CNY/M\n      informational — implicit cache price\n  ✓ quants: fp16,int8 -> fp16,int8,fp8\n      informational — quants removed=[] added=[fp8]\n2 delta(s): 0 red, 2 green, 0 amber\n",
+      "exit_code": 0
+    }
+  ]
+}

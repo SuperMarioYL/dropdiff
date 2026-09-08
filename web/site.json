@@ -1,47 +1,244 @@
 {
-  "schema": 1,
-  "content_version": 1,
-  "name": "dropdiff",
+  "schema": 3,
+  "name": "DropDiff",
   "github": "https://github.com/SuperMarioYL/dropdiff",
   "host": "dropdiff.lei6393.com",
-  "lang": { "primary": "zh", "toggle": true },
-  "accent": ["#3f9c8f"],
+  "palette": "auto",
+  "lang": {
+    "primary": "zh",
+    "toggle": true
+  },
+  "meta": {
+    "visual_profile": "neon-particle",
+    "content_version": "0.1.0",
+    "demo_source": "docs/demo-results.json"
+  },
   "hero": {
-    "eyebrow": { "zh": "国产模型 drop · 配置感知 · 一条命令", "en": "Chinese-model drops · Config-aware · One command" },
-    "headline": { "zh": "这周又 drop 了一堆国产模型\n只标出影响你配置的那几条", "en": "Another week, another pile of model drops\nOnly the ones that touch your setup" },
-    "sub": { "zh": "它先读你接进编码助手的那份模型配置，再拿这周的 drop 一条条对照——只把真正动了你字段的变更标成红绿：价格、上下文长度、缓存价、可用的量化档、工具调用行为。卡片是模型作者写的，不知道你接的是哪个；它知道。", "en": "It reads the model config you wired into your coding agent, then checks each week's drop against it — flagging only the changes that touch your fields in red and green: price, context length, cache price, available quants, tool-call behavior. A card is written by the model's author, who doesn't know which one you're on. This does." },
-    "command": "dropdiff check",
-    "cta": { "zh": "一条命令开跑", "en": "Run it in one command" },
-    "ctaGithub": { "zh": "在 GitHub 上查看", "en": "View on GitHub" },
-    "scroll": { "zh": "看它怎么标", "en": "See how it flags" }
+    "eyebrow": {
+      "zh": "将模型规格快照与已配置字段对照，区分直接相关与仅供参考的变化。",
+      "en": "Compare model-spec snapshots with wired fields and distinguish relevant changes from informational deltas."
+    },
+    "headline": {
+      "zh": "配置已经接好，\n再看哪些规格变了",
+      "en": "Your configuration is wired.\nSee which specs changed."
+    },
+    "sub": {
+      "zh": "将模型规格快照与已配置字段对照，区分直接相关与仅供参考的变化。",
+      "en": "Compare model-spec snapshots with wired fields and distinguish relevant changes from informational deltas."
+    },
+    "href": "#quickstart",
+    "cta": {
+      "zh": "运行示例",
+      "en": "Run the example"
+    },
+    "ctaGithub": {
+      "zh": "查看源码",
+      "en": "View source"
+    }
+  },
+  "scene": {
+    "kind": "neon-graph",
+    "caption": {
+      "zh": "配置快照 · 字段差异",
+      "en": "CONFIGURATION SNAPSHOT · FIELD DELTAS"
+    },
+    "fallback": "/assets/presentation/scene-dark.svg",
+    "fallbackLight": "/assets/presentation/scene-light.svg"
   },
   "advantages": [
     {
-      "title": { "zh": "只标动到你配置的那几条", "en": "Only the deltas that touch your setup" },
-      "body": { "zh": "每个 drop 都带着一堆变更——价格、上下文、缓存、量化、工具调用。DropDiff 只把你真正接进 Agent 的字段挑出来标红绿，其余的当背景音略过。卡片是模型作者写的，不知道你接的是哪个；它知道。", "en": "Every drop ships a pile of changes — price, context, cache, quants, tool-calling. DropDiff picks out only the fields you actually wired into your agent, flags them red or green, and lets the rest fade into background. A card is written by the model's author, who doesn't know which one you're on. This does." },
-      "chips": ["› 只看你的字段", "› 其余当背景音"]
+      "title": {
+        "zh": "关联已配置字段",
+        "en": "Relate wired fields"
+      },
+      "body": {
+        "zh": "Affects 区分相关和 informational 项。",
+        "en": "Affects distinguishes relevant and informational items."
+      }
     },
     {
-      "title": { "zh": "你接的配置，它自己读出来", "en": "It reads the config you already wired" },
-      "body": { "zh": "不用手填一张表——它直接探测你编码助手里的模型、地址、上下文和缓存设置，记成一份你接的配置。下次 drop 来了，对照的就是你真在用的那一份，不是一份过时的清单。", "en": "No form to fill — it detects the model, endpoint, context, and cache settings already living in your coding agent and records them as your wired config. When the next drop lands, it's checked against what you're actually running, not a stale checklist." },
-      "chips": ["› 探测你的编码助手配置", "› 自动记下你接的配置"]
+      "title": {
+        "zh": "可离线比较",
+        "en": "Compare offline"
+      },
+      "body": {
+        "zh": "使用本地或嵌入 registry 完成 diff。",
+        "en": "Use a local or embedded registry for diffs."
+      }
     },
     {
-      "title": { "zh": "没网也能跑这一条", "en": "Runs even with no network" },
-      "body": { "zh": "装上就能 check——一份随程序一起带的 drop 清单，第一次跑不用联网拉取。想刷新到最新一周，一条 sync 拉回来；拉不到，照样对照自带的那一份。", "en": "Install and check right away — a drop list ships with the program, so the first run needs no network fetch. Want the freshest week? One sync pulls it in; if it can't, you still diff against the copy that came with it." },
-      "chips": ["› 自带 drop 清单", "› 离线首跑可用"]
-    },
-    {
-      "title": { "zh": "卡片更新前，它先抓到", "en": "Caught before the card updates" },
-      "body": { "zh": "国产模型的 drop 往往先出现在厂商的代码提交里，等卡片更新已经晚了好几天。DropDiff 的每条 drop 都标着来源——卡片链接和那条提交，哪个先到就用哪个，不等你手动扒五个 tab。", "en": "Chinese-model drops often show up first in a vendor's code commit; by the time the card updates, days have passed. Every drop in DropDiff carries its source — the card link and that commit — whichever lands first is used, so you stop digging through five tabs by hand." },
-      "chips": ["› 每条带来源", "› 提交先于卡片"]
+      "title": {
+        "zh": "保留变更数值",
+        "en": "Retain before and after"
+      },
+      "body": {
+        "zh": "每个 delta 附字段、旧值、新值与说明。",
+        "en": "Each delta carries a field, old value, new value and note."
+      }
     }
   ],
-  "scene": { "kind": "hub-nodes", "nodes": ["DeepSeek", "Qwen", "Kimi", "GLM"] },
-  "cta": {
-    "headline": { "zh": "每周的 drop，不再靠手动扒", "en": "Weekly drops, no more digging by hand" },
-    "sub": { "zh": "一条命令装上，让国产模型 carousel 的变更只对你接的配置说话。", "en": "Install in one command — the carousel's changes speak only to the config you wired." },
-    "button": { "zh": "在 GitHub 上查看", "en": "View on GitHub" }
+  "story": {
+    "intro": {
+      "title": {
+        "zh": "让变更与自己的配置对上",
+        "en": "Relate changes to your configuration"
+      },
+      "body": {
+        "zh": "模型规格更新后，context、缓存模式或工具调用约定是否与你有关，取决于当前接入了什么。DropDiff 将 WiredConfig 和策展注册表做字段比较，保留 Before、After、Affects 和严重度，帮助定位需要进一步核对的项。",
+        "en": "Whether a context, cache or tool-call change matters depends on the configuration already in use. DropDiff compares a WiredConfig with a curated registry and retains Before, After, Affects and severity fields to identify items for further review."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "zh": "从输入到结果",
+          "en": "From input to result"
+        },
+        "body": {
+          "zh": "实际调用核心 differ，分别以 implicit 和 off 的缓存模式读取相同快照。输出只证明字段相关性规则的执行，没有查询最新模型定价、SDK commit 或平台配置。",
+          "en": "The real differ compares the same snapshot with implicit and off cache modes. The output exercises field-relevance rules; it does not query current pricing, SDK commits or platform settings."
+        },
+        "image": {
+          "light": "/assets/presentation/process-light.svg",
+          "dark": "/assets/presentation/process-dark.svg",
+          "alt": {
+            "zh": "实际调用核心 differ，分别以 implicit 和 off 的缓存模式读取相同快照。输出只证明字段相关性规则的执行，没有查询最新模型定价、SDK commit 或平台配置。",
+            "en": "The real differ compares the same snapshot with implicit and off cache modes. The output exercises field-relevance rules; it does not query current pricing, SDK commits or platform settings."
+          }
+        }
+      },
+      {
+        "title": {
+          "zh": "工作原理",
+          "en": "How it works"
+        },
+        "body": {
+          "zh": "config 解析或读取模型配置，spec 加载 YAML DropSpec，differ 先寻找明确 successor，没有时可按同 vendor 的较新记录回退。render 输出相关或 informational 标签；check/list 可离线，sync 才拉取远程 registry。",
+          "en": "config parses or reads model settings; spec loads YAML DropSpecs. The differ prefers explicit successors and can fall back to newer records from the same vendor. render labels relevant and informational changes. check/list can run offline; sync fetches a registry."
+        },
+        "image": {
+          "light": "/assets/presentation/architecture-light.svg",
+          "dark": "/assets/presentation/architecture-dark.svg",
+          "alt": {
+            "zh": "config 解析或读取模型配置，spec 加载 YAML DropSpec，differ 先寻找明确 successor，没有时可按同 vendor 的较新记录回退。render 输出相关或 informational 标签；check/list 可离线，sync 才拉取远程 registry。",
+            "en": "config parses or reads model settings; spec loads YAML DropSpecs. The differ prefers explicit successors and can fall back to newer records from the same vendor. render labels relevant and informational changes. check/list can run offline; sync fetches a registry."
+          }
+        }
+      },
+      {
+        "title": {
+          "zh": "能力与接入",
+          "en": "Capabilities and integration"
+        },
+        "body": {
+          "zh": "比较依赖注册表维护质量。明确 successor 优于同 vendor 的日期回退；价格只在单位相同时比较。报告用于筛选待核对变化，不替代供应商来源核验。",
+          "en": "Comparison depends on registry quality. Explicit successors are preferred over same-vendor date fallback, and prices compare only when units match. Reports help select changes to verify rather than replacing source verification."
+        },
+        "image": {
+          "light": "/assets/presentation/integrations-light.svg",
+          "dark": "/assets/presentation/integrations-dark.svg",
+          "alt": {
+            "zh": "比较依赖注册表维护质量。明确 successor 优于同 vendor 的日期回退；价格只在单位相同时比较。报告用于筛选待核对变化，不替代供应商来源核验。",
+            "en": "Comparison depends on registry quality. Explicit successors are preferred over same-vendor date fallback, and prices compare only when units match. Reports help select changes to verify rather than replacing source verification."
+          }
+        }
+      }
+    ],
+    "details": [
+      {
+        "title": {
+          "zh": "快照不是实时行情",
+          "en": "A snapshot is not a live quote"
+        },
+        "body": {
+          "zh": "请核对 registry 的日期与来源，sync 也只获取其配置的数据。",
+          "en": "Inspect registry dates and sources; sync only fetches the configured data source."
+        }
+      }
+    ]
   },
-  "footer": { "tag": { "zh": "MIT · 本地跑 · 一条命令", "en": "MIT · Runs locally · One command" } }
+  "demo": {
+    "title": {
+      "zh": "实际运行结果",
+      "en": "Actual demo output"
+    },
+    "note": {
+      "zh": "实际调用核心 differ，分别以 implicit 和 off 的缓存模式读取相同快照。输出只证明字段相关性规则的执行，没有查询最新模型定价、SDK commit 或平台配置。",
+      "en": "The real differ compares the same snapshot with implicit and off cache modes. The output exercises field-relevance rules; it does not query current pricing, SDK commits or platform settings."
+    },
+    "source": "https://github.com/SuperMarioYL/dropdiff/blob/main/docs/demo-results.json",
+    "steps": [
+      {
+        "label": {
+          "zh": "缓存启用",
+          "en": "Cache enabled"
+        },
+        "body": {
+          "zh": "implicit 模式将缓存价格项标记为相关。",
+          "en": "Implicit cache mode marks the cache-price field as relevant."
+        },
+        "command": "go run ./examples/presentation implicit",
+        "output": "Local registry snapshot: 2026-08-09; fixture cache_mode=implicit\n\nglm-5.3  2026-07-29  [GLM]\n  ✓ pricing.cache: 0.28 CNY/M -> 0.14 CNY/M\n      affects your wired config — implicit cache price\n  ✓ quants: fp16,int8 -> fp16,int8,fp8\n      informational — quants removed=[] added=[fp8]\n2 delta(s): 0 red, 2 green, 0 amber\n",
+        "image": "/assets/presentation/demo-0-light.svg",
+        "imageDark": "/assets/presentation/demo-0-dark.svg"
+      },
+      {
+        "label": {
+          "zh": "缓存关闭",
+          "en": "Cache disabled"
+        },
+        "body": {
+          "zh": "off 模式下同一字段作为 informational 显示。",
+          "en": "With cache off, the same field is informational."
+        },
+        "command": "go run ./examples/presentation off",
+        "output": "Local registry snapshot: 2026-08-09; fixture cache_mode=off\n\nglm-5.3  2026-07-29  [GLM]\n  ✓ pricing.cache: 0.28 CNY/M -> 0.14 CNY/M\n      informational — implicit cache price\n  ✓ quants: fp16,int8 -> fp16,int8,fp8\n      informational — quants removed=[] added=[fp8]\n2 delta(s): 0 red, 2 green, 0 amber\n",
+        "image": "/assets/presentation/demo-1-light.svg",
+        "imageDark": "/assets/presentation/demo-1-dark.svg"
+      }
+    ]
+  },
+  "quickstart": {
+    "title": {
+      "zh": "从完整输入开始",
+      "en": "Start with complete input"
+    },
+    "body": {
+      "zh": "需要 Go 1.24+。演示使用完整的显式配置与本地 registry，不需要模型服务或用户配置。",
+      "en": "Requires Go 1.24+. The demo uses a complete explicit configuration and local registry, without a model service or user settings."
+    },
+    "steps": [
+      {
+        "title": {
+          "zh": "安装",
+          "en": "Install"
+        },
+        "code": "git clone https://github.com/SuperMarioYL/dropdiff.git\ncd dropdiff\ngo build -o dropdiff ."
+      },
+      {
+        "title": {
+          "zh": "运行自带示例",
+          "en": "Run the supplied example"
+        },
+        "code": "go run ./examples/presentation implicit\ngo run ./examples/presentation off"
+      }
+    ]
+  },
+  "limitations": [
+    {
+      "zh": "本次未核验 bundled registry 的价格或来源引用，不能当作实时供应商信息。",
+      "en": "Bundled prices and source references were not verified as live vendor information."
+    },
+    {
+      "zh": "同 vendor 回退匹配可能包含并非直接升级关系的模型。",
+      "en": "Same-vendor fallback can include models that are not direct upgrades."
+    },
+    {
+      "zh": "工具只报告差异，不修改 Agent 配置或执行升级。",
+      "en": "The tool reports differences without changing agent configuration or performing upgrades."
+    }
+  ],
+  "footer": {
+    "tag": "0.1.0 · Go 1.24+ · MIT"
+  }
 }

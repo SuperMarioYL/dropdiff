@@ -1,0 +1,90 @@
+{
+  "name": "DropDiff",
+  "tagline": "Compare a wired configuration with a curated model-spec snapshot.",
+  "architecture": {
+    "title": "Wired settings and registry entries to deltas",
+    "nodes": [
+      {
+        "title": "WiredConfig",
+        "detail": "Model, context, cache mode"
+      },
+      {
+        "title": "Drop registry",
+        "detail": "Curated YAML snapshot"
+      },
+      {
+        "title": "Successor matching",
+        "detail": "Explicit chain or vendor fallback"
+      },
+      {
+        "title": "Field differ",
+        "detail": "Before / After / Affects"
+      },
+      {
+        "title": "Report",
+        "detail": "Relevant and informational rows"
+      }
+    ],
+    "edges": [
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        4
+      ]
+    ]
+  },
+  "process": {
+    "title": "Change only the fixture cache mode",
+    "steps": [
+      {
+        "title": "Load snapshot",
+        "detail": "Explicit local registry file"
+      },
+      {
+        "title": "Compare fixture",
+        "detail": "glm-4.6 with implicit cache"
+      },
+      {
+        "title": "Disable cache",
+        "detail": "Same delta becomes informational"
+      }
+    ],
+    "result": "The same snapshot is compared twice with different cache-mode inputs; no live price lookup occurs."
+  },
+  "integrations": {
+    "title": "Configuration and spec-data routes",
+    "items": [
+      {
+        "title": "Wired YAML",
+        "detail": "Explicit --config input"
+      },
+      {
+        "title": "Config discovery",
+        "detail": "Claude / Aider / .env sources"
+      },
+      {
+        "title": "Bundled registry",
+        "detail": "Embedded snapshot fallback"
+      },
+      {
+        "title": "Registry sync",
+        "detail": "Optional remote YAML fetch"
+      },
+      {
+        "title": "Field deltas",
+        "detail": "Context, pricing, quants, tools"
+      }
+    ]
+  }
+}
