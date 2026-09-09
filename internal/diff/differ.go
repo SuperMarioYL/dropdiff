@@ -96,7 +96,9 @@ func diffSpecs(wired *config.WiredConfig, base, drop *spec.DropSpec) []ConfigDel
 	ctxWired := wired.Context != ""
 
 	// Pricing — input/output/cache per M tokens. Refuse to diff across
-	// mismatched units (the carousel mixes CNY and USD quotes).
+	// mismatched units (the carousel mixes CNY and USD quotes), but never go
+	// silent on a unit switch: surface it as an amber informational delta so
+	// a currency change cannot hide a pricing change (m5).
 	if base.Pricing.Unit == drop.Pricing.Unit {
 		out = appendDelta(out, drop, "pricing.input",
 			fmtPrice(base.Pricing.Input, base.Pricing.Unit), fmtPrice(drop.Pricing.Input, drop.Pricing.Unit),
@@ -107,6 +109,13 @@ func diffSpecs(wired *config.WiredConfig, base, drop *spec.DropSpec) []ConfigDel
 		out = appendDelta(out, drop, "pricing.cache",
 			fmtPrice(base.Pricing.Cache, base.Pricing.Unit), fmtPrice(drop.Pricing.Cache, drop.Pricing.Unit),
 			cacheWired, severityPrice(base.Pricing.Cache, drop.Pricing.Cache), "implicit cache price")
+	} else {
+		out = append(out, ConfigDelta{
+			Model: drop.Model, Vendor: drop.Vendor, DropDate: drop.DropDate,
+			Field: "pricing.unit", Before: base.Pricing.Unit, After: drop.Pricing.Unit,
+			Affects: false, Severity: "amber",
+			Note: "pricing unit changed — prices not comparable across units; verify vs your bill",
+		})
 	}
 
 	// Context window.

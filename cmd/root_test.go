@@ -15,8 +15,8 @@ func TestRootHasSubcommands(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	if Version != "0.1.0" {
-		t.Errorf("Version=%q want 0.1.0", Version)
+	if Version != "0.2.0" {
+		t.Errorf("Version=%q want 0.2.0", Version)
 	}
 	if rootCmd.Version == "" {
 		t.Error("rootCmd.Version should be set so --version works")

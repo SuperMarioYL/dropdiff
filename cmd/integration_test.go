@@ -133,7 +133,7 @@ func TestIntegrationHappyPath(t *testing.T) {
 
 	// --version reports the VERSION.
 	out = runDrop(t, root, home, work, "--version")
-	if !strings.Contains(out, "0.1.0") {
+	if !strings.Contains(out, "0.2.0") {
 		t.Errorf("--version output=%q", out)
 	}
 }

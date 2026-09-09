@@ -148,6 +148,47 @@ func TestDiffQwenPriceUpRed(t *testing.T) {
 	}
 }
 
+// m5: when a successor switches pricing unit (CNY/M -> USD/M), the differ
+// must surface one amber pricing.unit delta instead of dropping every pricing
+// signal — while still refusing numeric comparison across units.
+func TestDiffPricingUnitChangeSurfaced(t *testing.T) {
+	reg := &spec.Registry{Drops: []spec.DropSpec{
+		{Model: "glm-4.6", Vendor: "GLM", DropDate: "2026-06-17", Pricing: spec.PriceDelta{Input: 2, Output: 2, Cache: 0.28, Unit: "CNY/M"}, Context: 128000, ToolCall: spec.ToolCallSpec{Supported: true, Format: "openai-tools", Quirk: "x"}},
+		{Model: "glm-5.3", Vendor: "GLM", DropDate: "2026-07-29", Pricing: spec.PriceDelta{Input: 0.28, Output: 0.28, Cache: 0.04, Unit: "USD/M"}, Context: 128000, ToolCall: spec.ToolCallSpec{Supported: true, Format: "openai-tools", Quirk: "x"}, Successor: "glm-4.6"},
+	}}
+	wired := &config.WiredConfig{Model: "glm-4.6", CacheMode: "implicit", Context: "128000"}
+	deltas := diff.New().Diff(wired, reg)
+
+	unit := findDelta(deltas, "pricing.unit")
+	if unit == nil {
+		t.Fatalf("unit change must surface a pricing.unit delta; got %+v", deltas)
+	}
+	if unit.Before != "CNY/M" || unit.After != "USD/M" {
+		t.Errorf("pricing.unit before/after=%q -> %q, want CNY/M -> USD/M", unit.Before, unit.After)
+	}
+	if unit.Severity != "amber" || unit.Affects {
+		t.Errorf("pricing.unit delta should be amber informational; got severity=%q affects=%v", unit.Severity, unit.Affects)
+	}
+	// numbers are not comparable across units → no numeric pricing deltas
+	for _, field := range []string{"pricing.input", "pricing.output", "pricing.cache"} {
+		if d := findDelta(deltas, field); d != nil {
+			t.Errorf("%s delta must not be emitted across units; got %+v", field, d)
+		}
+	}
+	// same fields, same units → unchanged behavior
+	sameUnit := &spec.Registry{Drops: []spec.DropSpec{
+		reg.Drops[0],
+		{Model: "glm-5.3", Vendor: "GLM", DropDate: "2026-07-29", Pricing: spec.PriceDelta{Input: 2, Output: 2, Cache: 0.14, Unit: "CNY/M"}, Context: 128000, ToolCall: spec.ToolCallSpec{Supported: true, Format: "openai-tools", Quirk: "x"}, Successor: "glm-4.6"},
+	}}
+	deltas = diff.New().Diff(wired, sameUnit)
+	if findDelta(deltas, "pricing.unit") != nil {
+		t.Error("no pricing.unit delta when units match")
+	}
+	if cache := findDelta(deltas, "pricing.cache"); cache == nil {
+		t.Error("same-unit cache price delta must still be emitted")
+	}
+}
+
 func TestDiffToolCallQuirkAmber(t *testing.T) {
 	reg := &spec.Registry{Drops: []spec.DropSpec{
 		{Model: "kimi-k2.5", Vendor: "Kimi", DropDate: "2026-06-24", Pricing: spec.PriceDelta{Input: 0.5, Output: 1.5, Cache: 0.1, Unit: "CNY/M"}, Context: 256000, Quants: []string{"fp16"}, ToolCall: spec.ToolCallSpec{Supported: true, Format: "openai-tools", Quirk: "stable json mode"}},

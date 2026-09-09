@@ -331,9 +331,10 @@ func scanKeyValue(text string) map[string]string {
 		} else {
 			continue
 		}
-		key = strings.ToUpper(strings.ReplaceAll(key, "-", "_"))
-		// strip a leading "- " list bullet / "* "
-		key = strings.TrimLeft(key, "*- ")
+		// Strip a leading "- " / "* " list bullet BEFORE normalizing hyphens:
+		// after ReplaceAll("-","_") the bullet's hyphen is already an underscore
+		// and the trim could never fire (m4 — "- KEY=V" used to parse as "_ KEY").
+		key = strings.ToUpper(strings.ReplaceAll(strings.TrimLeft(key, "*- "), "-", "_"))
 		if val != "" {
 			if _, dup := m[key]; !dup {
 				m[key] = val

@@ -4,6 +4,30 @@ All notable changes to DropDiff are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-09-09
+
+Post-ship grill iteration: two correctness fixes to the m1 parser and the m3
+differ, plus the lockstep version bump.
+
+### Fixed — m1 wired-config detection
+- `scanKeyValue` claimed to strip a leading `- ` list bullet, but the
+  hyphen-to-underscore key normalization ran first, so `- MODEL=glm-4.6`
+  parsed as key `_ MODEL` and was silently dropped. `dropdiff init` now
+  captures model/base_url/context hints inlined as `- ` / `* ` list bullets
+  in `./CLAUDE.md`, `.env` fragments, and aider conf YAML lists.
+
+### Added — m3 diff coverage
+- When a successor drop switches pricing unit (e.g. CNY/M → USD/M),
+  `dropdiff check` now prints one amber informational `pricing.unit` delta
+  instead of silently emitting no pricing deltas at all. Numeric prices are
+  still never compared across units.
+
+### Changed
+- Version 0.1.0 → 0.2.0 lockstep across every surface: `VERSION`,
+  `cmd/root.go`, tests, README badges, `web/site.json`
+  (`meta.content_version` + `footer.tag`), `docs/demo-results.json`, and the
+  recorded `assets/demo.cast` `--version` output.
+
 ## [0.1.0] — 2026-08-09
 
 First release. The Renovate/Dependabot spec-diff primitive, pointed at the

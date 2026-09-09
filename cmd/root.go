@@ -12,7 +12,7 @@ import (
 )
 
 // Version is the single source for the --version flag and the release tag.
-var Version = "0.1.0"
+var Version = "0.2.0"
 
 // DefaultRegistryURL is the hosted raw-GitHub YAML the sync command pulls.
 // It self-heals: the live release badge reads the same repo.

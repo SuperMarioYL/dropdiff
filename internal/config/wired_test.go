@@ -33,6 +33,44 @@ func TestScanKeyValueStripsQuotes(t *testing.T) {
 	}
 }
 
+// m4: "- " list bullets (markdown's default, also YAML lists) must parse to
+// the same key as the unbulleted form — previously the hyphen-to-underscore
+// normalization ran first and "- MODEL=..." parsed as key "_ MODEL".
+func TestScanKeyValueStripsListBullets(t *testing.T) {
+	lines := []string{
+		"- MODEL=glm-4.6",
+		"* MODEL=glm-4.6",
+		"- OPENAI_API_BASE=https://open.bigmodel.cn",
+		"- model: glm-4.6",
+		"- MAX_CONTEXT: 128000",
+	}
+	for _, line := range lines {
+		m := scanKeyValue(line)
+		if len(m) != 1 {
+			t.Errorf("scanKeyValue(%q) = %v, want exactly one key", line, m)
+			continue
+		}
+		for k, v := range m {
+			switch k {
+			case "MODEL":
+				if v != "glm-4.6" {
+					t.Errorf("scanKeyValue(%q)[%q] = %q, want glm-4.6", line, k, v)
+				}
+			case "OPENAI_API_BASE":
+				if v != "https://open.bigmodel.cn" {
+					t.Errorf("scanKeyValue(%q)[%q] = %q", line, k, v)
+				}
+			case "MAX_CONTEXT":
+				if v != "128000" {
+					t.Errorf("scanKeyValue(%q)[%q] = %q", line, k, v)
+				}
+			default:
+				t.Errorf("scanKeyValue(%q) produced mangled key %q", line, k)
+			}
+		}
+	}
+}
+
 func TestParseEnv(t *testing.T) {
 	dir := t.TempDir()
 	envPath := filepath.Join(dir, ".env")

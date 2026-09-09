@@ -9,7 +9,7 @@
 
 **将模型规格快照与已配置字段对照，区分直接相关与仅供参考的变化。**
 
-`v0.1.0` · `Go 1.24+` · [MIT](LICENSE)
+`v0.2.0` · `Go 1.24+` · [MIT](LICENSE)
 
 [Website](https://dropdiff.lei6393.com) · [Demo record](docs/demo-results.json)
 
