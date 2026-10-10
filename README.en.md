@@ -9,7 +9,7 @@
 
 **Compare model-spec snapshots with wired fields and distinguish relevant changes from informational deltas.**
 
-`v0.2.0` · `Go 1.24+` · [MIT](LICENSE)
+`v0.3.0` · `Go 1.24+` · [MIT](LICENSE)
 
 [Website](https://dropdiff.lei6393.com) · [Demo record](docs/demo-results.json)
 

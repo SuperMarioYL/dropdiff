@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "scope": "Offline core diff against an explicit repository registry snapshot. Snapshot pricing and source references were not verified as current vendor facts; no user configuration is read or synchronized.",
   "inputs": [
     {

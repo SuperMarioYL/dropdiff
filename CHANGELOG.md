@@ -4,6 +4,39 @@ All notable changes to DropDiff are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-10-11
+
+Post-ship grill iteration: two differ/detector correctness fixes, the CI
+gating flag deferred from v0.2.0, and the lockstep version bump.
+
+### Fixed — m3 differ edge paths
+- The tool-call block emitted at most one `tool_call.*` delta per successor:
+  the mutually exclusive `switch` hid a concurrent quirk or format change
+  behind whichever case matched first. `dropdiff check` now prints one delta
+  per changed tool-call field, matching how pricing deltas already work.
+- The no-baseline fallback (wired model not in the registry) excluded
+  `cache_mode` off/none but not `false`, marking the cache heads-up as
+  affecting for `cache_mode=false` users — contradicting the documented
+  not-affecting contract. Both paths now share one `cacheWired` predicate.
+
+### Fixed — m1 wired-config detection
+- `scanKeyValue` parsed the common shell-style `export KEY=VALUE` .env form
+  to key `EXPORT KEY`, which never matched, so `dropdiff init` silently
+  missed model/base_url/context/cache hints from export-prefixed fragments.
+  A leading case-insensitive `export ` prefix is now stripped.
+
+### Added — CI gating
+- `dropdiff check --strict` exits non-zero when at least one delta is red
+  AND affects a field the user actually wired, for CI and coding-agent
+  gating. Without the flag the default print-only exit-0 contract is
+  unchanged.
+
+### Changed
+- Version 0.2.0 → 0.3.0 lockstep across every surface: `VERSION`,
+  `cmd/root.go`, tests, README badges, `web/site.json`
+  (`meta.content_version` + `footer.tag`), `docs/demo-results.json`, and the
+  recorded `assets/demo.cast` `--version` output.
+
 ## [0.2.0] — 2026-09-09
 
 Post-ship grill iteration: two correctness fixes to the m1 parser and the m3
