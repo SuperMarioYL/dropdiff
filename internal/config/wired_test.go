@@ -71,6 +71,57 @@ func TestScanKeyValueStripsListBullets(t *testing.T) {
 	}
 }
 
+// m8: shell-style "export KEY=VALUE" lines (a common real-world .env form)
+// must parse to the same key as the unprefixed form — previously the key
+// normalized to "EXPORT KEY" and never matched kvFieldMap.
+func TestScanKeyValueStripsExportPrefix(t *testing.T) {
+	lines := []string{
+		"export MODEL=glm-4.6",
+		"EXPORT OPENAI_API_BASE=https://open.bigmodel.cn",
+		"export CACHE_MODE=implicit",
+		"export MAX_CONTEXT: 128000",
+	}
+	for _, line := range lines {
+		m := scanKeyValue(line)
+		if len(m) != 1 {
+			t.Errorf("scanKeyValue(%q) = %v, want exactly one key", line, m)
+			continue
+		}
+		for k, v := range m {
+			switch k {
+			case "MODEL":
+				if v != "glm-4.6" {
+					t.Errorf("scanKeyValue(%q)[%q] = %q, want glm-4.6", line, k, v)
+				}
+			case "OPENAI_API_BASE":
+				if v != "https://open.bigmodel.cn" {
+					t.Errorf("scanKeyValue(%q)[%q] = %q", line, k, v)
+				}
+			case "CACHE_MODE":
+				if v != "implicit" {
+					t.Errorf("scanKeyValue(%q)[%q] = %q", line, k, v)
+				}
+			case "MAX_CONTEXT":
+				if v != "128000" {
+					t.Errorf("scanKeyValue(%q)[%q] = %q", line, k, v)
+				}
+			default:
+				t.Errorf("scanKeyValue(%q) produced mangled key %q", line, k)
+			}
+		}
+	}
+}
+
+func TestScanKeyValueMixedPlainAndExport(t *testing.T) {
+	m := scanKeyValue("MODEL=glm-4.6\nexport OPENAI_API_BASE=https://open.bigmodel.cn\n")
+	if m["MODEL"] != "glm-4.6" {
+		t.Errorf("MODEL=%q want glm-4.6", m["MODEL"])
+	}
+	if m["OPENAI_API_BASE"] != "https://open.bigmodel.cn" {
+		t.Errorf("OPENAI_API_BASE=%q want https://open.bigmodel.cn", m["OPENAI_API_BASE"])
+	}
+}
+
 func TestParseEnv(t *testing.T) {
 	dir := t.TempDir()
 	envPath := filepath.Join(dir, ".env")

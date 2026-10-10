@@ -334,7 +334,14 @@ func scanKeyValue(text string) map[string]string {
 		// Strip a leading "- " / "* " list bullet BEFORE normalizing hyphens:
 		// after ReplaceAll("-","_") the bullet's hyphen is already an underscore
 		// and the trim could never fire (m4 — "- KEY=V" used to parse as "_ KEY").
-		key = strings.ToUpper(strings.ReplaceAll(strings.TrimLeft(key, "*- "), "-", "_"))
+		key = strings.TrimLeft(key, "*- ")
+		// Strip a shell-style "export " prefix: real .env fragments often carry
+		// `export KEY=VALUE` lines, and without this the key normalizes to
+		// "EXPORT KEY" and never matches kvFieldMap (m8).
+		if len(key) > 7 && strings.EqualFold(key[:7], "export ") {
+			key = strings.TrimSpace(key[7:])
+		}
+		key = strings.ToUpper(strings.ReplaceAll(key, "-", "_"))
 		if val != "" {
 			if _, dup := m[key]; !dup {
 				m[key] = val
