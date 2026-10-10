@@ -72,8 +72,18 @@
         "en": "Retain before and after"
       },
       "body": {
-        "zh": "每个 delta 附字段、旧值、新值与说明。",
-        "en": "Each delta carries a field, old value, new value and note."
+        "zh": "每个 delta 附字段、旧值、新值与说明，工具调用的每个字段变化都单独成行。",
+        "en": "Each delta carries a field, old value, new value and note; every changed tool-call field gets its own delta."
+      }
+    },
+    {
+      "title": {
+        "zh": "CI 可门禁",
+        "en": "Gate in CI"
+      },
+      "body": {
+        "zh": "check --strict 在出现影响已配置字段的回归时以非零退出码结束。",
+        "en": "check --strict exits non-zero when a regression touches a wired field."
       }
     }
   ],
@@ -233,6 +243,13 @@
           "en": "Run the supplied example"
         },
         "code": "go run ./examples/presentation implicit\ngo run ./examples/presentation off"
+      },
+      {
+        "title": {
+          "zh": "接入你自己的配置",
+          "en": "Wire your own config"
+        },
+        "code": "./dropdiff init\n./dropdiff check\n./dropdiff check --strict"
       }
     ]
   },
@@ -253,5 +270,5 @@
   "footer": {
     "tag": "0.3.0 · Go 1.24+ · MIT"
   },
-  "content_version": 1
+  "content_version": 2
 }
