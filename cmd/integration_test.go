@@ -157,3 +157,59 @@ func TestIntegrationCheckBeforeInitErrors(t *testing.T) {
 		t.Errorf("check before init should hint `dropdiff init`; got\n%s", out.String())
 	}
 }
+
+// runDropExpectFail runs `go run .` expecting a non-zero exit (m9 CI gating)
+// and returns the combined output for assertions.
+func runDropExpectFail(t *testing.T, root, home string, args ...string) string {
+	t.Helper()
+	cmd := exec.Command("go", append([]string{"run", "."}, args...)...)
+	cmd.Dir = root
+	cmd.Env = dropEnv(home)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	if err := cmd.Run(); err == nil {
+		t.Fatalf("dropdiff %v unexpectedly exited 0\n%s", args, out.String())
+	}
+	return out.String()
+}
+
+// TestIntegrationCheckStrictExitCode — m9: `check --strict` exits non-zero
+// only when a red config-affecting delta exists; plain check still exits 0,
+// and a green-only wired config passes --strict too.
+func TestIntegrationCheckStrictExitCode(t *testing.T) {
+	root := findModuleRoot(t)
+
+	// Red case: wired qwen3-vl — the bundled registry's qwen3.8-max successor
+	// raises input/output/cache prices, so a red Affects delta must exist.
+	home := t.TempDir()
+	work := t.TempDir()
+	envContent := "MODEL=qwen3-vl\nOPENAI_API_BASE=https://dashscope.aliyuncs.com\nCACHE_MODE=implicit\nMAX_CONTEXT=131072\n"
+	if err := os.WriteFile(filepath.Join(work, ".env"), []byte(envContent), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	runDrop(t, root, home, work, "init", "--cwd", work)
+
+	// plain check: same report, exit 0 (default contract unchanged).
+	runDrop(t, root, home, work, "check")
+
+	// --strict: non-zero, and the stderr reason explains the gate.
+	out := runDropExpectFail(t, root, home, "check", "--strict")
+	if !strings.Contains(out, "pricing.input") {
+		t.Errorf("strict run should still print the red delta report; got\n%s", out)
+	}
+	if !strings.Contains(out, "--strict") {
+		t.Errorf("strict failure should explain itself; got\n%s", out)
+	}
+
+	// Green-only case: wired glm-4.6 — only green deltas (cache price drop),
+	// so --strict passes with exit 0.
+	home2 := t.TempDir()
+	work2 := t.TempDir()
+	envContent2 := "MODEL=glm-4.6\nOPENAI_API_BASE=https://open.bigmodel.cn\nCACHE_MODE=implicit\nMAX_CONTEXT=128000\n"
+	if err := os.WriteFile(filepath.Join(work2, ".env"), []byte(envContent2), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	runDrop(t, root, home2, work2, "init", "--cwd", work2)
+	runDrop(t, root, home2, work2, "check", "--strict")
+}

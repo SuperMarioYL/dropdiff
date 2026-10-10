@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var checkStrict bool
+
 var checkCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Print red/green config-affecting deltas for this week's drops",
@@ -42,10 +44,26 @@ before the ModelScope card even updates — caught from the SDK commit log.`,
 		if len(deltas) > 0 {
 			fmt.Println(render.Summary(deltas))
 		}
+		// m9: opt-in CI/agent gating — non-zero exit only when a delta is both
+		// red (regressive) and Affects=true (touches a field the user wired).
+		// The default print-only exit-0 contract is unchanged without --strict.
+		if checkStrict {
+			red := 0
+			for _, d := range deltas {
+				if d.Severity == "red" && d.Affects {
+					red++
+				}
+			}
+			if red > 0 {
+				cmd.SilenceUsage = true
+				return fmt.Errorf("check: %d red config-affecting delta(s) — failing due to --strict", red)
+			}
+		}
 		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(checkCmd)
+	checkCmd.Flags().BoolVar(&checkStrict, "strict", false, "exit non-zero when red config-affecting deltas exist (CI gating)")
 }
