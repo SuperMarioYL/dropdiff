@@ -89,10 +89,7 @@ func (d *Differ) Diff(wired *config.WiredConfig, reg *spec.Registry) []ConfigDel
 func diffSpecs(wired *config.WiredConfig, base, drop *spec.DropSpec) []ConfigDelta {
 	var out []ConfigDelta
 
-	cacheWired := wired.CacheMode != "" &&
-		!strings.EqualFold(wired.CacheMode, "off") &&
-		!strings.EqualFold(wired.CacheMode, "none") &&
-		!strings.EqualFold(wired.CacheMode, "false")
+	cacheIsWired := cacheWired(wired.CacheMode)
 	ctxWired := wired.Context != ""
 
 	// Pricing — input/output/cache per M tokens. Refuse to diff across
@@ -108,7 +105,7 @@ func diffSpecs(wired *config.WiredConfig, base, drop *spec.DropSpec) []ConfigDel
 			true, severityPrice(base.Pricing.Output, drop.Pricing.Output), "output token price")
 		out = appendDelta(out, drop, "pricing.cache",
 			fmtPrice(base.Pricing.Cache, base.Pricing.Unit), fmtPrice(drop.Pricing.Cache, drop.Pricing.Unit),
-			cacheWired, severityPrice(base.Pricing.Cache, drop.Pricing.Cache), "implicit cache price")
+			cacheIsWired, severityPrice(base.Pricing.Cache, drop.Pricing.Cache), "implicit cache price")
 	} else {
 		out = append(out, ConfigDelta{
 			Model: drop.Model, Vendor: drop.Vendor, DropDate: drop.DropDate,
@@ -139,21 +136,18 @@ func diffSpecs(wired *config.WiredConfig, base, drop *spec.DropSpec) []ConfigDel
 		})
 	}
 
-	// Tool-call contract — the field a coding agent cares most about.
-	switch {
-	case base.ToolCall.Supported != drop.ToolCall.Supported:
-		out = appendDelta(out, drop, "tool_call.supported",
-			fmt.Sprintf("%v", base.ToolCall.Supported), fmt.Sprintf("%v", drop.ToolCall.Supported),
-			true, severityBool(base.ToolCall.Supported, drop.ToolCall.Supported), "tool-call support")
-	case base.ToolCall.Format != drop.ToolCall.Format:
-		out = appendDelta(out, drop, "tool_call.format",
-			base.ToolCall.Format, drop.ToolCall.Format,
-			true, "amber", "tool-call format changed")
-	case base.ToolCall.Quirk != drop.ToolCall.Quirk:
-		out = appendDelta(out, drop, "tool_call.quirk",
-			base.ToolCall.Quirk, drop.ToolCall.Quirk,
-			true, "amber", "tool-call quirk changed")
-	}
+	// Tool-call contract — the field a coding agent cares most about. Each
+	// changed field gets its own delta: a switch here would let whichever
+	// case matched first hide a concurrent format/quirk/support change (m7).
+	out = appendDelta(out, drop, "tool_call.supported",
+		fmt.Sprintf("%v", base.ToolCall.Supported), fmt.Sprintf("%v", drop.ToolCall.Supported),
+		true, severityBool(base.ToolCall.Supported, drop.ToolCall.Supported), "tool-call support")
+	out = appendDelta(out, drop, "tool_call.format",
+		base.ToolCall.Format, drop.ToolCall.Format,
+		true, "amber", "tool-call format changed")
+	out = appendDelta(out, drop, "tool_call.quirk",
+		base.ToolCall.Quirk, drop.ToolCall.Quirk,
+		true, "amber", "tool-call quirk changed")
 
 	return out
 }
@@ -176,9 +170,7 @@ func diffAgainstWired(wired *config.WiredConfig, drop *spec.DropSpec) []ConfigDe
 			})
 		}
 	}
-	if wired.CacheMode != "" &&
-		!strings.EqualFold(wired.CacheMode, "off") &&
-		!strings.EqualFold(wired.CacheMode, "none") {
+	if cacheWired(wired.CacheMode) {
 		out = append(out, ConfigDelta{
 			Model: drop.Model, Vendor: drop.Vendor, DropDate: drop.DropDate,
 			Field: "pricing.cache", Before: "—", After: fmtPrice(drop.Pricing.Cache, drop.Pricing.Unit),
@@ -187,6 +179,19 @@ func diffAgainstWired(wired *config.WiredConfig, drop *spec.DropSpec) []ConfigDe
 		})
 	}
 	return out
+}
+
+// cacheWired reports whether the user's cache mode actually uses implicit
+// caching. Empty/off/none/false mean there is no cache pricing wired, so the
+// differ must not flag a cache delta as affecting the config. Shared by the
+// successor path and the no-baseline fallback so both honor the same contract
+// (the README documents empty/off/none/false as not-affecting).
+func cacheWired(mode string) bool {
+	switch strings.ToLower(strings.TrimSpace(mode)) {
+	case "", "off", "none", "false":
+		return false
+	}
+	return true
 }
 
 func appendDelta(out []ConfigDelta, drop *spec.DropSpec, field, before, after string, affects bool, severity, note string) []ConfigDelta {

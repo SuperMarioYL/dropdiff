@@ -208,6 +208,76 @@ func TestDiffToolCallQuirkAmber(t *testing.T) {
 	}
 }
 
+// m7: the tool-call block must emit one delta per changed field. A switch
+// here let whichever case matched first hide concurrent format/quirk changes.
+func TestDiffToolCallMultiFieldEmitsEach(t *testing.T) {
+	reg := &spec.Registry{Drops: []spec.DropSpec{
+		{Model: "base", Vendor: "GLM", DropDate: "2026-06-01", Pricing: spec.PriceDelta{Input: 1, Output: 1, Cache: 0.1, Unit: "CNY/M"}, Context: 128000, ToolCall: spec.ToolCallSpec{Supported: true, Format: "openai-tools", Quirk: "quirk-A"}},
+		{Model: "next", Vendor: "GLM", DropDate: "2026-07-01", Pricing: spec.PriceDelta{Input: 1, Output: 1, Cache: 0.1, Unit: "CNY/M"}, Context: 128000, ToolCall: spec.ToolCallSpec{Supported: true, Format: "native", Quirk: "quirk-B"}, Successor: "base"},
+	}}
+	wired := &config.WiredConfig{Model: "base"}
+	deltas := diff.New().Diff(wired, reg)
+
+	format := findDelta(deltas, "tool_call.format")
+	if format == nil {
+		t.Fatalf("missing tool_call.format delta; got %+v", deltas)
+	}
+	if format.Before != "openai-tools" || format.After != "native" {
+		t.Errorf("format before/after=%q -> %q", format.Before, format.After)
+	}
+	quirk := findDelta(deltas, "tool_call.quirk")
+	if quirk == nil {
+		t.Fatalf("tool_call.quirk change must not be hidden behind the format change; got %+v", deltas)
+	}
+	if quirk.Before != "quirk-A" || quirk.After != "quirk-B" {
+		t.Errorf("quirk before/after=%q -> %q", quirk.Before, quirk.After)
+	}
+	if findDelta(deltas, "tool_call.supported") != nil {
+		t.Error("unchanged supported must not produce a delta")
+	}
+}
+
+// m7: when every tool-call field changes, all three deltas appear.
+func TestDiffToolCallAllFieldsEmit(t *testing.T) {
+	reg := &spec.Registry{Drops: []spec.DropSpec{
+		{Model: "base", Vendor: "Kimi", DropDate: "2026-06-01", Pricing: spec.PriceDelta{Input: 1, Output: 1, Cache: 0.1, Unit: "CNY/M"}, Context: 128000, ToolCall: spec.ToolCallSpec{Supported: true, Format: "openai-tools", Quirk: "quirk-A"}},
+		{Model: "next", Vendor: "Kimi", DropDate: "2026-07-01", Pricing: spec.PriceDelta{Input: 1, Output: 1, Cache: 0.1, Unit: "CNY/M"}, Context: 128000, ToolCall: spec.ToolCallSpec{Supported: false, Format: "xml", Quirk: "quirk-B"}, Successor: "base"},
+	}}
+	wired := &config.WiredConfig{Model: "base"}
+	deltas := diff.New().Diff(wired, reg)
+	for _, field := range []string{"tool_call.supported", "tool_call.format", "tool_call.quirk"} {
+		if findDelta(deltas, field) == nil {
+			t.Errorf("missing %s delta; got %+v", field, deltas)
+		}
+	}
+	if sup := findDelta(deltas, "tool_call.supported"); sup.Severity != "red" {
+		t.Errorf("supported true->false severity=%q want red", sup.Severity)
+	}
+}
+
+// m7: the no-baseline fallback must honor the same cache contract as the
+// successor path — cache_mode=false means no Affects=true cache delta.
+func TestDiffFallbackCacheModeFalse(t *testing.T) {
+	reg := &spec.Registry{Drops: []spec.DropSpec{
+		{Model: "glm-5.3", Vendor: "GLM", DropDate: "2026-07-29", Pricing: spec.PriceDelta{Input: 0.5, Output: 0.5, Cache: 0.14, Unit: "CNY/M"}, Context: 256000, ToolCall: spec.ToolCallSpec{Supported: true, Format: "openai-tools", Quirk: "x"}},
+	}}
+	wired := &config.WiredConfig{Model: "glm-4.6-custom", CacheMode: "false", Context: "128000"}
+	deltas := diff.New().Diff(wired, reg)
+	if cache := findDelta(deltas, "pricing.cache"); cache != nil {
+		t.Errorf("cache_mode=false must not emit a cache delta in the fallback; got %+v", cache)
+	}
+
+	wired.CacheMode = "implicit"
+	deltas = diff.New().Diff(wired, reg)
+	cache := findDelta(deltas, "pricing.cache")
+	if cache == nil {
+		t.Fatalf("cache_mode=implicit fallback must emit the cache heads-up; got %+v", deltas)
+	}
+	if !cache.Affects {
+		t.Error("fallback cache delta must Affects=true when cache mode is wired")
+	}
+}
+
 func TestDiffNoSuccessorsNoDeltas(t *testing.T) {
 	// wired model has no successor in registry → no deltas
 	reg := &spec.Registry{Drops: []spec.DropSpec{
